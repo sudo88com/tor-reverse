@@ -1,24 +1,16 @@
-version: '3.8'
 services:
   reverse-tor:
-    container_name: reverse-tor
-    build: .
-    image: reverse-tor:latest
+    container_name: tor-reverse
+    build:
+      context: .
+    image: ghcr.io/sudo88com/tor-reverse:latest
     restart: always
     environment:
       REVERSE_PROXY: "nginx-test:80"
     volumes:
       - ./web:/web
-    networks:
-      - tor-public
 
   nginx-test:
-    container_name: nginx-test
+    container_name: tor-nginx
     image: nginx:latest
     restart: always
-    networks:
-      - tor-public
-
-networks:
-  tor-public:
-    external: true

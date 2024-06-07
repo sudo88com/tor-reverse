@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help setup deploy info destroy help
+.PHONY: help setup deploy info destroy
 
 compose_v2_not_supported = $(shell command docker compose 2> /dev/null)
 ifeq (,$(compose_v2_not_supported))
@@ -17,7 +17,7 @@ help:
 	@echo "destroy         Clean up"
 
 setup:
-		@docker run -it --rm -v $(pwd)/web:/web ghcr.io/sudo88com/reverse-tor:latest generate dev
+		@docker run -it --rm -v ./web:/web ghcr.io/sudo88com/tor-reverse:latest generate tor
 
 deploy:
 		@$(DOCKER_COMPOSE_COMMAND) -f docker-compose.yml up -d

@@ -1,9 +1,9 @@
 ## mkp224o - vanity address generator for ed25519 onion services
 
-This tool generates vanity ed25519 ([hidden service version 3][v3],
+This tool generates vanity ed25519 (hidden service version 3[^1][^2],
 formely known as proposal 224) onion addresses.
 
-### Requirements
+### Requirements for building
 
 * C99 compatible compiler (gcc and clang should work)
 * libsodium (including headers)
@@ -15,28 +15,31 @@ formely known as proposal 224) onion addresses.
 For debian-like linux distros, this should be enough to prepare for building:
 
 ```bash
-apt install gcc libsodium-dev make autoconf
+apt install gcc libc6-dev libsodium-dev make autoconf
 ```
 
 ### Building
 
-`./autogen.sh` to generate configure script, if it's not there already.
+Run `./autogen.sh` to generate a configure script, if there isn't one already.
 
-`./configure` to generate makefile; in \*BSD platforms you probably want to use
+Run `./configure` to generate a makefile.
+On \*BSD platforms you may need to specify extra include/library paths:
 `./configure CPPFLAGS="-I/usr/local/include" LDFLAGS="-L/usr/local/lib"`.
 
 On AMD64 platforms, you probably also want to pass something like
-`--enable-amd64-51-30k`  to configure script for faster key generation;
+`--enable-amd64-51-30k` to the configure script invocation for faster key generation;
 run `./configure --help` to see all available options.
 
 Finally, `make` to start building (`gmake` in \*BSD platforms).
 
 ### Usage
 
-Generator needs one or more filters to work.
+mkp224o needs one or more filters to work.
+You may specify them as command line arguments,
+eg `./mkp224o test`, or load them from file with `-f` switch.
 
-It makes directory with secret/public keys and hostname
-for each discovered service. By default root is current
+It makes directories with secret/public keys and hostnames
+for each discovered service. By default, the working directory is the current
 directory, but that can be overridden with `-d` switch.
 
 Use `-s` switch to enable printing of statistics, which may be useful
@@ -75,9 +78,9 @@ performance-related tips.
   Then edit `torrc` and add new service with that folder.\
   After reload/restart tor should pick it up.
 
-* Generate addresses with 1-2 and 7-9 digits?
+* How to generate addresses with `0-1` and `8-9` digits?
 
-  Onion addresses use base32 encoding which does not include 0,1,8,9
+  Onion addresses use base32 encoding which does not include `0,1,8,9`
   numbers.\
   So no, that's not possible to generate these, and mkp224o tries to
   detect invalid filters containing them early on.
@@ -100,10 +103,14 @@ performance-related tips.
   It appears that onionbalance supports loading usual
   `hs_ed25519_secret_key` key so it should work.
 
-### Contact
+* Is there a docker image?
 
-For bug reports/questions/whatever else, email cathugger at cock dot li.\
-PGP key, if needed, can be found at <http://cathug2kyi4ilneggumrenayhuhsvrgn6qv2y47bgeet42iivkpynqad.onion/contact.html>.
+  Yes, if you do not wish to compile mkp224o yourself, you can use
+  the `ghcr.io/cathugger/mkp224o` image like so:
+
+  ```bash
+  docker run --rm -it -v $PWD:/keys ghcr.io/cathugger/mkp224o:master -d /keys neko
+  ```
 
 ### Acknowledgements & Legal
 
@@ -124,7 +131,6 @@ along with this software. If not, see [CC0][].
 * Passphrase-based generation code and idea used in `worker_batch()`
   contributed by [foobar2019][]
 
-[v3]: https://gitweb.torproject.org/torspec.git/plain/rend-spec-v3.txt
 [OPTIMISATION]: ./OPTIMISATION.txt
 [#27]: https://github.com/cathugger/mkp224o/issues/27
 [keccak.c]: https://github.com/XKCP/XKCP/blob/master/Standalone/CompactFIPS202/C/Keccak-more-compact.c
@@ -133,3 +139,5 @@ along with this software. If not, see [CC0][].
 [ed25519-donna]: https://github.com/floodyberry/ed25519-donna
 [horse25519]: https://github.com/Yawning/horse25519
 [foobar2019]: https://github.com/foobar2019
+[^1]: https://spec.torproject.org/rend-spec/index.html
+[^2]: https://gitlab.torproject.org/tpo/core/torspec/-/raw/main/attic/text_formats/rend-spec-v3.txt

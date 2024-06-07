@@ -90,39 +90,63 @@ VEC_STRUCT(tstatsvec,struct tstatstruct);
 static void printhelp(FILE *out,const char *progname)
 {
 	fprintf(out,
-		"Usage: %s filter [filter...] [options]\n"
-		"       %s -f filterfile [options]\n"
+		//         1         2         3         4         5         6         7
+		//1234567890123456789012345678901234567890123456789012345678901234567890123456789
+		"Usage: %s FILTER [FILTER...] [OPTION]\n"
+		"       %s -f FILTERFILE [OPTION]\n"
 		"Options:\n"
-		"\t-h  - print help to stdout and quit\n"
-		"\t-f  - specify filter file which contains filters separated by newlines\n"
-		"\t-D  - deduplicate filters\n"
-		"\t-q  - do not print diagnostic output to stderr\n"
-		"\t-x  - do not print onion names\n"
-		"\t-v  - print more diagnostic data\n"
-		"\t-o filename  - output onion names to specified file (append)\n"
-		"\t-O filename  - output onion names to specified file (overwrite)\n"
-		"\t-F  - include directory names in onion names output\n"
-		"\t-d dirname  - output directory\n"
-		"\t-t numthreads  - specify number of threads to utilise (default - CPU core count or 1)\n"
-		"\t-j numthreads  - same as -t\n"
-		"\t-n numkeys  - specify number of keys (default - 0 - unlimited)\n"
-		"\t-N numwords  - specify number of words per key (default - 1)\n"
-		"\t-Z  - use \"slower\" key generation method (initial default)\n"
-		"\t-z  - use \"faster\" key generation method (later default)\n"
-		"\t-B  - use batching key generation method (>10x faster than -z, current default)\n"
-		"\t-s  - print statistics each 10 seconds\n"
-		"\t-S t  - print statistics every specified ammount of seconds\n"
-		"\t-T  - do not reset statistics counters when printing\n"
-		"\t-y  - output generated keys in YAML format instead of dumping them to filesystem\n"
-		"\t-Y [filename [host.onion]]  - parse YAML encoded input and extract key(s) to filesystem\n"
-		"\t--rawyaml  - raw (unprefixed) public/secret keys for -y/-Y (may be useful for tor controller API)\n"
+		"  -f FILTERFILE         specify filter file which contains filters separated\n"
+		"                        by newlines.\n"
+		"  -D                    deduplicate filters.\n"
+		"  -q                    do not print diagnostic output to stderr.\n"
+		"  -x                    do not print onion names.\n"
+		"  -v                    print more diagnostic data.\n"
+		"  -o FILENAME           output onion names to specified file (append).\n"
+		"  -O FILENAME           output onion names to specified file (overwrite).\n"
+		"  -F                    include directory names in onion names output.\n"
+		"  -d DIRNAME            output directory.\n"
+		"  -t NUMTHREADS         specify number of threads to utilise\n"
+		"                        (default - try detecting CPU core count).\n"
+		"  -j NUMTHREADS         same as -t.\n"
+		"  -n NUMKEYS            specify number of keys (default - 0 - unlimited).\n"
+		"  -N NUMWORDS           specify number of words per key (default - 1).\n"
+		"  -Z                    deprecated, does nothing.\n"
+		"  -z                    deprecated, does nothing.\n"
+		"  -B                    use batching key generation method (current default).\n"
+		"  -s                    print statistics each 10 seconds.\n"
+		"  -S SECONDS            print statistics every specified amount of seconds.\n"
+		"  -T                    do not reset statistics counters when printing.\n"
+		"  -y                    output generated keys in YAML format instead of\n"
+		"                        dumping them to filesystem.\n"
+		"  -Y [FILENAME [host.onion]]\n"
+		"                        parse YAML encoded input and extract key(s) to\n"
+		"                        filesystem.\n"
 #ifdef PASSPHRASE
-		"\t-p passphrase  - use passphrase to initialize the random seed with\n"
-		"\t-P  - same as -p, but takes passphrase from PASSPHRASE environment variable\n"
-		"\t--checkpoint filename - load/save checkpoint of progress to specified file (requires passphrase)\n"
+		"  -p PASSPHRASE         use passphrase to initialize the random seed with.\n"
+		"  -P                    same as -p, but takes passphrase from PASSPHRASE\n"
+		"                        environment variable.\n"
+		"  --checkpoint filename\n"
+		"                        load/save checkpoint of progress to specified file\n"
+		"                        (requires passphrase).\n"
+		"  --skipnear            skip near passphrase keys; you probably want this\n"
+		"                        because of improved safety unless you're trying to\n"
+		"                        regenerate an old key; possible future default.\n"
+		"  --warnnear            print warning about passphrase key being near another\n"
+		"                        (safety hazard); prefer --skipnear to this unless\n"
+		"                        you're regenerating an old key.\n"
 #endif
+		"      --rawyaml         raw (unprefixed) public/secret keys for -y/-Y\n"
+		"                        (may be useful for tor controller API).\n"
+		"  -h, --help, --usage   print help to stdout and quit.\n"
+		"  -V, --version         print version information to stdout and exit.\n"
 		,progname,progname);
 	fflush(out);
+}
+
+static void printversion(void)
+{
+	fprintf(stdout,"mkp224o " VERSION "\n");
+	fflush(stdout);
 }
 
 static void e_additional(void)
@@ -195,7 +219,7 @@ static void savecheckpoint(void)
 
 	if (syncwrite(checkpointfile,1,checkpoint,SEED_LEN) < 0) {
 		pthread_mutex_lock(&fout_mutex);
-		fprintf(stderr,"ERROR: could not save checkpoint\n");
+		fprintf(stderr,"ERROR: could not save checkpoint to \"%s\"\n",checkpointfile);
 		pthread_mutex_unlock(&fout_mutex);
 	}
 }
@@ -238,8 +262,6 @@ VEC_STRUCT(threadvec,pthread_t);
 #include "filters_main.inc.h"
 
 enum worker_type {
-	WT_SLOW,
-	WT_FAST,
 	WT_BATCH,
 };
 
@@ -303,6 +325,10 @@ int main(int argc,char **argv)
 					printhelp(stdout,progname);
 					exit(0);
 				}
+				else if (!strcmp(arg,"version")) {
+					printversion();
+					exit(0);
+				}
 				else if (!strcmp(arg,"rawyaml"))
 					yamlraw = 1;
 #ifdef PASSPHRASE
@@ -311,6 +337,14 @@ int main(int argc,char **argv)
 						checkpointfile = *argv++;
 					else
 						e_additional();
+				}
+				else if (!strcmp(arg,"skipnear")) {
+					pw_skipnear = 1;
+					pw_warnnear = 0;
+				}
+				else if (!strcmp(arg,"warnnear")) {
+					pw_warnnear = 1;
+					pw_skipnear = 0;
 				}
 #endif // PASSPHRASE
 				else {
@@ -326,6 +360,10 @@ int main(int argc,char **argv)
 			}
 			else if (*arg == 'h') {
 				printhelp(stdout,progname);
+				exit(0);
+			}
+			else if (*arg == 'V') {
+				printversion();
 				exit(0);
 			}
 			else if (*arg == 'f') {
@@ -390,9 +428,9 @@ int main(int argc,char **argv)
 					e_additional();
 			}
 			else if (*arg == 'Z')
-				wt = WT_SLOW;
+				/* ignored */ ;
 			else if (*arg == 'z')
-				wt = WT_FAST;
+				/* ignored */ ;
 			else if (*arg == 'B')
 				wt = WT_BATCH;
 			else if (*arg == 's') {
@@ -480,10 +518,12 @@ int main(int argc,char **argv)
 		exit(1);
 	}
 
+#ifdef PASSPHRASE
 	if (checkpointfile && !deterministic) {
 		fprintf(stderr,"--checkpoint requires passphrase\n");
 		exit(1);
 	}
+#endif
 
 	if (outfile) {
 		fout = fopen(outfile,!outfileoverwrite ? "a" : "w");
@@ -571,8 +611,13 @@ int main(int argc,char **argv)
 
 #ifdef PASSPHRASE
 	if (deterministic) {
-		if (!quietflag && numneedgenerate != 1)
-			fprintf(stderr,"CAUTION: avoid using keys generated with same password for unrelated services, as single leaked key may help attacker to regenerate related keys.\n");
+		if (!quietflag && numneedgenerate != 1 && !pw_skipnear && !pw_warnnear)
+			fprintf(stderr,
+				//         1         2         3         4         5         6         7
+				//1234567890123456789012345678901234567890123456789012345678901234567890123456789
+				"CAUTION: avoid using keys generated with the same password for unrelated\n"
+				"         services, as single leaked key may help an attacker to regenerate\n"
+				"		  related keys; to silence this warning, pass --skipnear or --warnnear.\n");
 		if (checkpointfile) {
 			memcpy(orig_determseed,determseed,sizeof(determseed));
 			// Read current checkpoint position if file exists
@@ -586,8 +631,11 @@ int main(int argc,char **argv)
 				fclose(checkout);
 
 				// Apply checkpoint to determseed
-				for (int i = 0; i < SEED_LEN; i++)
-					determseed[i] += checkpoint[i];
+				bool carry = 0;
+				for (int i = 0; i < SEED_LEN; i++) {
+					determseed[i] += checkpoint[i] + carry;
+					carry = determseed[i] < checkpoint[i];
+				}
 			}
 		}
 	}
@@ -636,17 +684,10 @@ int main(int argc,char **argv)
 			tattrp,
 #ifdef PASSPHRASE
 			deterministic
-				? (wt == WT_BATCH
-					? worker_batch_pass
-					: worker_fast_pass)
+				? CRYPTO_NAMESPACE(worker_batch_pass)
 				:
 #endif
-			wt == WT_BATCH
-				? worker_batch
-				:
-			wt == WT_FAST
-				? worker_fast
-				: worker_slow,
+			CRYPTO_NAMESPACE(worker_batch),
 			tp
 		);
 		if (tret) {
@@ -661,7 +702,7 @@ int main(int argc,char **argv)
 			perror("pthread_attr_destroy");
 	}
 
-#if PASSPHRASE
+#ifdef PASSPHRASE
 	pthread_t checkpoint_thread;
 
 	if (checkpointfile) {

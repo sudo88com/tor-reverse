@@ -3,25 +3,26 @@
 
 #include "fe25519.h"
 #include "sc25519.h"
+#include "compat.h"
 
-#define ge25519                           crypto_sign_ed25519_amd64_64_ge25519
-#define ge25519_base                      crypto_sign_ed25519_amd64_64_ge25519_base
-#define ge25519_unpackneg_vartime         crypto_sign_ed25519_amd64_64_unpackneg_vartime
-#define ge25519_pack                      crypto_sign_ed25519_amd64_64_pack
-#define ge25519_isneutral_vartime         crypto_sign_ed25519_amd64_64_isneutral_vartime
-#define ge25519_add                       crypto_sign_ed25519_amd64_64_ge25519_add
-#define ge25519_double                    crypto_sign_ed25519_amd64_64_ge25519_double
-#define ge25519_double_scalarmult_vartime crypto_sign_ed25519_amd64_64_double_scalarmult_vartime
-#define ge25519_multi_scalarmult_vartime  crypto_sign_ed25519_amd64_64_ge25519_multi_scalarmult_vartime
-#define ge25519_scalarmult_base           crypto_sign_ed25519_amd64_64_scalarmult_base
-#define ge25519_p1p1_to_p2                crypto_sign_ed25519_amd64_64_ge25519_p1p1_to_p2
-#define ge25519_p1p1_to_p3                crypto_sign_ed25519_amd64_64_ge25519_p1p1_to_p3
-#define ge25519_add_p1p1                  crypto_sign_ed25519_amd64_64_ge25519_add_p1p1
-#define ge25519_dbl_p1p1                  crypto_sign_ed25519_amd64_64_ge25519_dbl_p1p1
-#define choose_t                          crypto_sign_ed25519_amd64_64_choose_t
-#define ge25519_nielsadd2                 crypto_sign_ed25519_amd64_64_ge25519_nielsadd2
-#define ge25519_nielsadd_p1p1             crypto_sign_ed25519_amd64_64_ge25519_nielsadd_p1p1
-#define ge25519_pnielsadd_p1p1            crypto_sign_ed25519_amd64_64_ge25519_pnielsadd_p1p1
+#define ge25519                           CRYPTO_NAMESPACE(ge25519)
+#define ge25519_base                      CRYPTO_NAMESPACE(ge25519_base)
+#define ge25519_unpackneg_vartime         CRYPTO_NAMESPACE(unpackneg_vartime)
+#define ge25519_pack                      CRYPTO_NAMESPACE(pack)
+#define ge25519_isneutral_vartime         CRYPTO_NAMESPACE(isneutral_vartime)
+#define ge25519_add                       CRYPTO_NAMESPACE(ge25519_add)
+#define ge25519_double                    CRYPTO_NAMESPACE(ge25519_double)
+#define ge25519_double_scalarmult_vartime CRYPTO_NAMESPACE(double_scalarmult_vartime)
+#define ge25519_multi_scalarmult_vartime  CRYPTO_NAMESPACE(ge25519_multi_scalarmult_vartime)
+#define ge25519_scalarmult_base           CRYPTO_NAMESPACE(scalarmult_base)
+#define ge25519_p1p1_to_p2                CRYPTO_NAMESPACE(ge25519_p1p1_to_p2)
+#define ge25519_p1p1_to_p3                CRYPTO_NAMESPACE(ge25519_p1p1_to_p3)
+#define ge25519_add_p1p1                  CRYPTO_NAMESPACE(ge25519_add_p1p1)
+#define ge25519_dbl_p1p1                  CRYPTO_NAMESPACE(ge25519_dbl_p1p1)
+#define choose_t                          CRYPTO_NAMESPACE(choose_t)
+#define ge25519_nielsadd2                 CRYPTO_NAMESPACE(ge25519_nielsadd2)
+#define ge25519_nielsadd_p1p1             CRYPTO_NAMESPACE(ge25519_nielsadd_p1p1)
+#define ge25519_pnielsadd_p1p1            CRYPTO_NAMESPACE(ge25519_pnielsadd_p1p1)
 
 
 #define ge25519_p3 ge25519
@@ -66,14 +67,14 @@ typedef struct
 
 typedef unsigned char bytes32[32];
 
-extern void ge25519_p1p1_to_p2(ge25519_p2 *r, const ge25519_p1p1 *p);
-extern void ge25519_p1p1_to_p3(ge25519_p3 *r, const ge25519_p1p1 *p);
-extern void ge25519_add_p1p1(ge25519_p1p1 *r, const ge25519_p3 *p, const ge25519_p3 *q);
-extern void ge25519_dbl_p1p1(ge25519_p1p1 *r, const ge25519_p2 *p);
-extern void choose_t(ge25519_niels *t, unsigned long long pos, signed long long b, const ge25519_niels *base_multiples);
-extern void ge25519_nielsadd2(ge25519_p3 *r, const ge25519_niels *q);
-extern void ge25519_nielsadd_p1p1(ge25519_p1p1 *r, const ge25519_p3 *p, const ge25519_niels *q);
-extern void ge25519_pnielsadd_p1p1(ge25519_p1p1 *r, const ge25519_p3 *p, const ge25519_pniels *q);
+extern void ge25519_p1p1_to_p2(ge25519_p2 *r, const ge25519_p1p1 *p) SYSVABI;
+extern void ge25519_p1p1_to_p3(ge25519_p3 *r, const ge25519_p1p1 *p) SYSVABI;
+extern void ge25519_add_p1p1(ge25519_p1p1 *r, const ge25519_p3 *p, const ge25519_p3 *q) SYSVABI;
+extern void ge25519_dbl_p1p1(ge25519_p1p1 *r, const ge25519_p2 *p) SYSVABI;
+extern void choose_t(ge25519_niels *t, unsigned long long pos, signed long long b, const ge25519_niels *base_multiples) SYSVABI;
+extern void ge25519_nielsadd2(ge25519_p3 *r, const ge25519_niels *q) SYSVABI;
+extern void ge25519_nielsadd_p1p1(ge25519_p1p1 *r, const ge25519_p3 *p, const ge25519_niels *q) SYSVABI;
+extern void ge25519_pnielsadd_p1p1(ge25519_p1p1 *r, const ge25519_p3 *p, const ge25519_pniels *q) SYSVABI;
 
 extern const ge25519 ge25519_base;
 

@@ -17,7 +17,6 @@
 #include "vec.h"
 #include "base32.h"
 #include "keccak.h"
-#include "ed25519/ed25519.h"
 #include "ioutil.h"
 #include "common.h"
 #include "yaml.h"
@@ -52,10 +51,6 @@ size_t numneedgenerate = 0;
 char *workdir = 0;
 size_t workdirlen = 0;
 
-void worker_init(void)
-{
-	ge_initeightpoint();
-}
 
 #ifdef PASSPHRASE
 // How many times we loop before a reseed
@@ -63,6 +58,8 @@ void worker_init(void)
 
 pthread_mutex_t determseed_mutex;
 u8 determseed[SEED_LEN];
+int pw_skipnear = 0;
+int pw_warnnear = 0;
 #endif
 
 
@@ -76,7 +73,7 @@ char *makesname(void)
 	return sname;
 }
 
-static void onionready(char *sname,const u8 *secret,const u8 *pubonion)
+static void onionready(char *sname,const u8 *secret,const u8 *pubonion,int warnnear)
 {
 	if (endwork)
 		return;
@@ -107,7 +104,7 @@ static void onionready(char *sname,const u8 *secret,const u8 *pubonion)
 	if (!yamloutput) {
 		if (createdir(sname,1) != 0) {
 			pthread_mutex_lock(&fout_mutex);
-			fprintf(stderr,"ERROR: could not create directory for key output\n");
+			fprintf(stderr,"ERROR: could not create directory \"%s\" for key output\n",sname);
 			pthread_mutex_unlock(&fout_mutex);
 			return;
 		}
@@ -127,6 +124,15 @@ static void onionready(char *sname,const u8 *secret,const u8 *pubonion)
 		}
 		if (fout) {
 			pthread_mutex_lock(&fout_mutex);
+#ifdef PASSPHRASE
+			const char * const pwarn = " warn:near\n";
+			if (warnnear)
+				strcpy(&sname[onionendpos],pwarn);
+			const size_t oprintlen = printlen;
+			const size_t printlen = oprintlen + (warnnear ? strlen(pwarn)-1 : 0);
+#else
+			(void) warnnear;
+#endif
 			fwrite(&sname[printstartpos],printlen,1,fout);
 			fflush(fout);
 			pthread_mutex_unlock(&fout_mutex);
@@ -155,6 +161,7 @@ union pubonionunion {
 	} i;
 } ;
 
+/*
 // little endian inc
 static void addsk32(u8 *sk)
 {
@@ -165,6 +172,7 @@ static void addsk32(u8 *sk)
 		if (!c) break;
 	}
 }
+*/
 
 // 0123 4567 xxxx --3--> 3456 7xxx
 // 0123 4567 xxxx --1--> 1234 567x
@@ -180,7 +188,6 @@ static inline void shiftpk(u8 *dst,const u8 *src,size_t sbits)
 		dst[i] = 0;
 }
 
-#include "worker_slow.inc.h"
 
 
 // in little-endian order, 32 bytes aka 256 bits
@@ -195,7 +202,6 @@ static void addsztoscalar32(u8 *dst,size_t v)
 	}
 }
 
-#include "worker_fast.inc.h"
 
 
 #ifdef PASSPHRASE
@@ -213,18 +219,63 @@ static void reseedright(u8 sk[SECRET_LEN])
 }
 #endif // PASSPHRASE
 
-#include "worker_fast_pass.inc.h"
 
 
 #if !defined(BATCHNUM)
 	#define BATCHNUM 2048
 #endif
 
+
+#include "ed25519/ed25519.h"
+
+#include "worker_impl.inc.h"
+
 size_t worker_batch_memuse(void)
 {
-	return (sizeof(ge_p3) + sizeof(fe) + sizeof(bytes32)) * BATCHNUM;
+	size_t s = 0,x;
+
+#ifdef ED25519_ref10
+	x = crypto_sign_ed25519_ref10_worker_batch_memuse();
+	if (x > s)
+		s = x;
+#endif
+
+#ifdef ED25519_amd64_51_30k
+	x = crypto_sign_ed25519_amd64_51_30k_worker_batch_memuse();
+	if (x > s)
+		s = x;
+#endif
+
+#ifdef ED25519_amd64_64_24k
+	x = crypto_sign_ed25519_amd64_64_24k_worker_batch_memuse();
+	if (x > s)
+		s = x;
+#endif
+
+#ifdef ED25519_donna
+	x = crypto_sign_ed25519_donna_worker_batch_memuse();
+	if (x > s)
+		s = x;
+#endif
+
+	return s;
 }
 
-#include "worker_batch.inc.h"
+void worker_init(void)
+{
+#ifdef ED25519_ref10
+	crypto_sign_ed25519_ref10_ge_initeightpoint();
+#endif
 
-#include "worker_batch_pass.inc.h"
+#ifdef ED25519_amd64_51_30k
+	crypto_sign_ed25519_amd64_51_30k_ge_initeightpoint();
+#endif
+
+#ifdef ED25519_amd64_64_24k
+	crypto_sign_ed25519_amd64_64_24k_ge_initeightpoint();
+#endif
+
+#ifdef ED25519_donna
+	crypto_sign_ed25519_donna_ge_initeightpoint();
+#endif
+}

@@ -33,6 +33,8 @@ VEC_STRUCT(statsvec,struct statstruct);
 #ifdef PASSPHRASE
 extern pthread_mutex_t determseed_mutex;
 extern u8 determseed[SEED_LEN];
+extern int pw_skipnear;
+extern int pw_warnnear;
 #endif
 
 extern void worker_init(void);
@@ -40,10 +42,7 @@ extern void worker_init(void);
 extern char *makesname(void);
 extern size_t worker_batch_memuse(void);
 
-extern void *worker_slow(void *task);
-extern void *worker_fast(void *task);
-extern void *worker_batch(void *task);
+extern void *CRYPTO_NAMESPACE(worker_batch)(void *task);
 #ifdef PASSPHRASE
-extern void *worker_fast_pass(void *task);
-extern void *worker_batch_pass(void *task);
+extern void *CRYPTO_NAMESPACE(worker_batch_pass)(void *task);
 #endif
