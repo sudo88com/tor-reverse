@@ -1,5 +1,5 @@
-   537505      4 drwxr-xr-x   5 root     root         4096 Jun 24 13:19 .
-   537921      0 -rw-r--r--   1 root     root            0 Jun 24 13:20 ./FILES
+   537505      4 drwxr-xr-x   5 root     root         4096 Jun 24 13:45 .
+   537921      0 -rw-r--r--   1 root     root            0 Jun 24 13:45 ./FILES
    537576      4 -rw-r--r--   1 root     root          830 Jun 24 13:19 ./Makefile
    537920      4 -rw-r--r--   1 root     root         1066 Jun 24 13:18 ./LICENSE
    537578      4 drwxr-xr-x   3 root     root         4096 Jun 24 13:14 ./app
@@ -343,10 +343,10 @@
    537584      4 drwxr-xr-x   2 root     root         4096 Jun 24 13:14 ./app/mkp224o/.github/workflows
    537585      4 -rw-r--r--   1 root     root         2946 Jun 24 13:14 ./app/mkp224o/.github/workflows/docker-publish.yml
    537581      4 -rw-r--r--   1 root     root          272 Jun 24 13:14 ./app/mkp224o/.editorconfig
-   537919      4 -rw-r--r--   1 root     root          328 Jun 24 13:14 ./docker-compose.yml
+   537919      4 -rw-r--r--   1 root     root          326 Jun 24 13:41 ./docker-compose.yml
    537574      4 -rw-r--r--   1 root     root            6 Jun 24 13:14 ./.gitignore
    537575      4 -rw-r--r--   1 root     root          858 Jun 24 13:14 ./Dockerfile
-   537577      4 -rw-r--r--   1 root     root         1072 Jun 24 13:19 ./README.md
+   537577      4 -rw-r--r--   1 root     root         1259 Jun 24 13:23 ./README.md
    537535      4 drwxr-xr-x   3 root     root         4096 Jun 24 13:14 ./.github
    537572      4 drwxr-xr-x   2 root     root         4096 Jun 24 13:15 ./.github/workflows
    537573      4 -rw-r--r--   1 root     root         1098 Jun 24 13:15 ./.github/workflows/docker_buildx.yml
