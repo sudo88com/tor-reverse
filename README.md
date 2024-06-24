@@ -1,4 +1,4 @@
-# tor-reverse
+# sudo88com/tor-reverse
 
 tor-reverse is a Tor network reverse proxy base implemented in Docker. It uses `mkp224o` to generate onion addresses and `nginx` to handle proxy passing.
 
@@ -54,3 +54,7 @@ To clean up the deployment:
 ```bash
 make destroy
 ```
+
+## License
+
+This project is licensed under the [MIT License](./LICENSE).

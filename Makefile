@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help setup deploy info destroy
+.PHONY: help files setup deploy info destroy
 
 compose_v2_not_supported = $(shell command docker compose 2> /dev/null)
 ifeq (,$(compose_v2_not_supported))
@@ -11,19 +11,23 @@ endif
 help:
 	@echo "Usage: make [TARGET]"
 	@echo "Targets:"
+	@echo "files           Show files"
 	@echo "setup           Generate onion address"
 	@echo "deploy          Deploy reverse proxy"
 	@echo "info            Show onion address"
 	@echo "destroy         Clean up"
 
+files:
+	@find . -path './.git' -prune -o -ls > FILES
+
 setup:
-		@docker run -it --rm -v ./web:/web ghcr.io/sudo88com/tor-reverse:latest generate tor
+	@docker run -it --rm -v ./web:/web ghcr.io/sudo88com/tor-reverse:latest generate tor
 
 deploy:
-		@$(DOCKER_COMPOSE_COMMAND) -f docker-compose.yml up -d
+	@$(DOCKER_COMPOSE_COMMAND) -f docker-compose.yml up -d
 
 info:
-		@cat web/hostname
+	@cat web/hostname
 
 destroy:
-		@$(DOCKER_COMPOSE_COMMAND) down && rm -rf web
+	@$(DOCKER_COMPOSE_COMMAND) down && rm -rf web
