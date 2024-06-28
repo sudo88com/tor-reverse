@@ -2,8 +2,8 @@ name: Docker Build- tor-reverse
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - '*'
   workflow_dispatch:
 
 jobs:
@@ -45,6 +45,7 @@ jobs:
           cache-to: type=gha,mode=max
           push: true
           tags: |
+            ghcr.io/${{ github.repository }}:${{ env.TAG }}
             ghcr.io/${{ github.repository }}:${{ env.VERSION }}
             ghcr.io/${{ github.repository }}:latest
 
