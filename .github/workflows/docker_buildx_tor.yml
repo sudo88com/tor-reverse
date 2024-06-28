@@ -46,7 +46,6 @@ jobs:
           push: true
           tags: |
             ghcr.io/${{ github.repository }}:${{ env.VERSION }}
-            ghcr.io/${{ github.repository }}:${{ env.TAG }}
             ghcr.io/${{ github.repository }}:latest
 
       - name: Run Slack Notification
