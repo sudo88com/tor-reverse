@@ -1,6 +1,6 @@
 # sudo88com/tor-reverse
 
-[![Docker Build](https://github.com/sudo88com/tor-reverse/actions/workflows/docker_buildx.yml/badge.svg)](https://github.com/sudo88com/tor-reverse/actions/workflows/docker_buildx.yml)
+[![Release Version](https://img.shields.io/github/v/release/sudo88com/tor-reverse.svg)](https://github.com/sudo88com/tor-reverse/releases)
 
 tor-reverse is a Tor network reverse proxy base implemented in Docker. It uses `mkp224o` to generate onion addresses and `nginx` to handle proxy passing.
 
